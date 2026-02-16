@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { AuthProvider } from "../lib/auth-context";
 import { Navbar } from "../components/Navbar";
+import { ToasterProvider } from "../components/ToasterProvider";
 
 export const metadata: Metadata = {
   title: "Smart Bookmark App",
@@ -21,6 +22,7 @@ const RootLayout = ({ children }: RootLayoutProps) => {
           <main className="app-main">
             <div className="app-container">{children}</div>
           </main>
+          <ToasterProvider />
         </AuthProvider>
       </body>
     </html>

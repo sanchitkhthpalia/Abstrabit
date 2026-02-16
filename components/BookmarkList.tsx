@@ -1,67 +1,63 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { collection, deleteDoc, doc, onSnapshot, query, where } from "firebase/firestore";
-import { db } from "../lib/firebase";
-import { useAuth } from "../lib/auth-context";
+import { useState } from "react";
 import type { Bookmark } from "../types";
 
-export const BookmarkList = () => {
-  const { user } = useAuth();
-  const [bookmarks, setBookmarks] = useState<Bookmark[]>([]);
-  const [loading, setLoading] = useState(true);
+interface BookmarkListProps {
+  bookmarks: Bookmark[];
+  loading: boolean;
+  onDeleteBookmark: (id: string) => Promise<void> | void;
+}
+
+export const BookmarkList = ({
+  bookmarks,
+  loading,
+  onDeleteBookmark
+}: BookmarkListProps) => {
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (!user) {
-      setBookmarks([]);
-      setLoading(false);
-      return;
-    }
-
-    const q = query(collection(db, "bookmarks"), where("userId", "==", user.uid));
-
-    const unsubscribe = onSnapshot(
-      q,
-      snapshot => {
-        const next: Bookmark[] = snapshot.docs.map(docSnap => {
-          const data = docSnap.data() as Omit<Bookmark, "id">;
-          return {
-            id: docSnap.id,
-            ...data
-          };
-        }).sort((a, b) => {
-          const aTime = a.createdAt ? a.createdAt.toMillis() : 0;
-          const bTime = b.createdAt ? b.createdAt.toMillis() : 0;
-          return bTime - aTime;
-        });
-        setBookmarks(next);
-        setLoading(false);
-      },
-      err => {
-        // eslint-disable-next-line no-console
-        console.error("Error listening to bookmarks", err);
-        setLoading(false);
-      }
-    );
-
-    return () => unsubscribe();
-  }, [user]);
-
-  const handleDelete = async (id: string) => {
+  const handleDeleteClick = async (id: string) => {
+    setDeletingId(id);
     try {
-      setDeletingId(id);
-      await deleteDoc(doc(db, "bookmarks", id));
-    } catch (err) {
-      // eslint-disable-next-line no-console
-      console.error("Failed to delete bookmark", err);
+      await onDeleteBookmark(id);
     } finally {
       setDeletingId(current => (current === id ? null : current));
     }
   };
 
+  const renderSkeleton = () => (
+    <ul className="space-y-2.5">
+      {Array.from({ length: 3 }).map((_, index) => (
+        // eslint-disable-next-line react/no-array-index-key
+        <li
+          key={index}
+          className="group flex items-center justify-between gap-3 rounded-xl border border-slate-800/80 bg-slate-900/80 px-3 py-3"
+        >
+          <div className="flex-1 animate-pulse space-y-2">
+            <div className="h-3 w-32 rounded-full bg-slate-700/70" />
+            <div className="h-3 w-44 rounded-full bg-slate-800/80" />
+          </div>
+          <div className="h-8 w-8 animate-pulse rounded-full bg-slate-800/80" />
+        </li>
+      ))}
+    </ul>
+  );
+
+  const renderEmptyState = () => (
+    <div className="flex items-center justify-center py-10">
+      <div className="w-full max-w-sm rounded-xl border border-dashed border-slate-700 bg-slate-900/60 px-6 py-8 text-center">
+        <h3 className="mb-1 text-sm font-semibold text-slate-100">
+          No bookmarks yet
+        </h3>
+        <p className="text-xs text-slate-400">
+          Add your first bookmark to get started 🚀
+        </p>
+      </div>
+    </div>
+  );
+
   return (
-    <section className="card p-4 sm:p-5 border-slate-800/60">
+    <section className="card border-slate-800/60 p-4 sm:p-5">
       <div className="mb-3 flex items-center justify-between gap-2">
         <h2 className="text-sm font-semibold text-slate-100">
           Your bookmarks
@@ -72,26 +68,22 @@ export const BookmarkList = () => {
       </div>
 
       {loading ? (
-        <div className="flex items-center justify-center py-10 text-xs text-slate-400">
-          Loading bookmarks...
-        </div>
+        renderSkeleton()
       ) : bookmarks.length === 0 ? (
-        <div className="rounded-xl border border-dashed border-slate-700 bg-slate-900/40 px-4 py-8 text-center text-xs text-slate-400">
-          No bookmarks yet. Add your first link above.
-        </div>
+        renderEmptyState()
       ) : (
         <ul className="space-y-2.5">
           {bookmarks.map(bookmark => (
             <li
               key={bookmark.id}
-              className="group flex items-center justify-between gap-3 rounded-xl border border-slate-800/80 bg-slate-900/80 px-3 py-3 transition-colors hover:border-primary/60 hover:bg-slate-900"
+              className="group flex items-center justify-between gap-3 rounded-xl border border-slate-800/80 bg-slate-900/80 px-3 py-3 transition-colors hover:border-slate-600 hover:bg-slate-900"
             >
               <div className="min-w-0 flex-1">
                 <a
                   href={bookmark.url}
                   target="_blank"
                   rel="noreferrer"
-                  className="block truncate text-sm font-medium text-slate-50 hover:text-primary-light"
+                  className="block truncate text-sm font-medium text-slate-50 transition-colors hover:text-blue-400"
                 >
                   {bookmark.title}
                 </a>
@@ -102,7 +94,7 @@ export const BookmarkList = () => {
 
               <button
                 type="button"
-                onClick={() => handleDelete(bookmark.id)}
+                onClick={() => handleDeleteClick(bookmark.id)}
                 disabled={deletingId === bookmark.id}
                 className="ml-1 inline-flex h-8 w-8 flex-none items-center justify-center rounded-full border border-transparent text-slate-400 transition-colors hover:border-red-500/60 hover:bg-red-950/40 hover:text-red-400 disabled:cursor-not-allowed disabled:opacity-60"
                 aria-label="Delete bookmark"

@@ -1,74 +1,58 @@
 "use client";
 
-import { type FormEvent, useState } from "react";
-import { addDoc, collection, serverTimestamp } from "firebase/firestore";
-import { db } from "../lib/firebase";
-import { useAuth } from "../lib/auth-context";
+import { FormEvent, useState } from "react";
+import toast from "react-hot-toast";
 
-export const BookmarkForm = () => {
-  const { user } = useAuth();
-  const [title, setTitle] = useState("");
-  const [url, setUrl] = useState("");
-  const [submitting, setSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+interface BookmarkFormProps {
+  onAddBookmark: (title: string, url: string) => Promise<void> | void;
+}
 
-  if (!user) {
-    return null;
-  }
+export const BookmarkForm = ({ onAddBookmark }: BookmarkFormProps) => {
+  const [title, setTitle] = useState<string>("");
+  const [url, setUrl] = useState<string>("");
+  const [submitting, setSubmitting] = useState<boolean>(false);
 
-  const validateUrl = (value: string): boolean => {
+  const normalizeUrl = (value: string): string => {
+    let trimmed = value.trim();
+    if (!trimmed) return trimmed;
+    if (!/^https?:\/\//i.test(trimmed)) {
+      trimmed = `https://${trimmed}`;
+    }
+    return trimmed;
+  };
+
+  const isValidUrl = (value: string): boolean => {
     try {
-      let toValidate = value.trim();
-      if (!/^https?:\/\//i.test(toValidate)) {
-        toValidate = `https://${toValidate}`;
-      }
+      const normalized = normalizeUrl(value);
       // eslint-disable-next-line no-new
-      new URL(toValidate);
+      new URL(normalized);
       return true;
     } catch {
       return false;
     }
   };
 
-  const normalizeUrl = (value: string): string => {
-    const trimmed = value.trim();
-    if (!trimmed) return trimmed;
-    if (!/^https?:\/\//i.test(trimmed)) {
-      return `https://${trimmed}`;
-    }
-    return trimmed;
-  };
-
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    setError(null);
 
+    const trimmedTitle = title.trim();
     const normalizedUrl = normalizeUrl(url);
 
-    if (!title.trim()) {
-      setError("Title is required.");
+    if (!trimmedTitle) {
+      toast.error("Title is required.");
       return;
     }
 
-    if (!validateUrl(url)) {
-      setError("Please enter a valid URL.");
+    if (!normalizedUrl || !isValidUrl(url)) {
+      toast.error("Please enter a valid URL.");
       return;
     }
 
     try {
       setSubmitting(true);
-      await addDoc(collection(db, "bookmarks"), {
-        title: title.trim(),
-        url: normalizedUrl,
-        userId: user.uid,
-        createdAt: serverTimestamp()
-      });
+      await onAddBookmark(trimmedTitle, normalizedUrl);
       setTitle("");
       setUrl("");
-    } catch (err) {
-      // eslint-disable-next-line no-console
-      console.error("Failed to add bookmark", err);
-      setError("Something went wrong while saving the bookmark.");
     } finally {
       setSubmitting(false);
     }
@@ -77,7 +61,7 @@ export const BookmarkForm = () => {
   return (
     <form
       onSubmit={handleSubmit}
-      className="card p-5 sm:p-6 mb-6 space-y-4 border-slate-800/60"
+      className="card mb-6 space-y-4 border-slate-800/60 p-5 sm:p-6"
     >
       <div className="flex items-center justify-between gap-2">
         <div>
@@ -126,16 +110,10 @@ export const BookmarkForm = () => {
         </div>
       </div>
 
-      {error && (
-        <p className="text-xs text-red-400 bg-red-950/40 border border-red-900/60 rounded-lg px-3 py-2">
-          {error}
-        </p>
-      )}
-
       <div className="flex justify-end">
         <button
           type="submit"
-          className="btn-primary px-4 py-2 text-sm"
+          className="btn-primary px-4 py-2 text-sm disabled:cursor-not-allowed disabled:opacity-70"
           disabled={submitting}
         >
           {submitting ? "Saving..." : "Save bookmark"}
