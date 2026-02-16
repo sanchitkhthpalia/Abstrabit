@@ -11,6 +11,7 @@ import {
   onSnapshot,
   query,
   serverTimestamp,
+  updateDoc,
   where
 } from "firebase/firestore";
 
@@ -50,19 +51,34 @@ const HomePage = () => {
     const unsubscribe = onSnapshot(
       q,
       snapshot => {
-        const next: Bookmark[] = snapshot.docs
-          .map(docSnap => {
-            const data = docSnap.data() as Omit<Bookmark, "id">;
-            return {
-              id: docSnap.id,
-              ...data
-            };
-          })
-          .sort((a, b) => {
-            const aTime = a.createdAt ? a.createdAt.toMillis() : 0;
-            const bTime = b.createdAt ? b.createdAt.toMillis() : 0;
-            return bTime - aTime;
-          });
+        const next: Bookmark[] = snapshot.docs.map(docSnap => {
+          const data = docSnap.data() as {
+            title?: string;
+            url?: string;
+            userId?: string;
+            tags?: unknown;
+            createdAt?: unknown;
+            lastVisitedAt?: unknown;
+          };
+
+          const rawTags = Array.isArray(data.tags) ? data.tags : [];
+          const tags = rawTags
+            .map(tag => (typeof tag === "string" ? tag.trim() : ""))
+            .filter(tag => tag.length > 0);
+
+          return {
+            id: docSnap.id,
+            title: data.title ?? "",
+            url: data.url ?? "",
+            userId: data.userId ?? "",
+            tags,
+            createdAt:
+              (data.createdAt as unknown as Bookmark["createdAt"]) ?? null,
+            lastVisitedAt:
+              (data.lastVisitedAt as unknown as Bookmark["lastVisitedAt"]) ??
+              null
+          };
+        });
 
         setBookmarks(next);
         setBookmarksLoading(false);
@@ -77,7 +93,9 @@ const HomePage = () => {
   }, [user]);
 
   const handleAddBookmark = useCallback(
-    async (title: string, url: string) => {
+    async (payload: { title: string; url: string; tags: string[] }) => {
+      const { title, url, tags } = payload;
+
       if (!user) {
         toast.error("You must be signed in to add bookmarks.");
         return;
@@ -89,7 +107,9 @@ const HomePage = () => {
         title,
         url,
         userId: user.uid,
-        createdAt: null
+        tags,
+        createdAt: null,
+        lastVisitedAt: null
       };
 
       setBookmarks(prev => [optimisticBookmark, ...prev]);
@@ -99,6 +119,7 @@ const HomePage = () => {
           title,
           url,
           userId: user.uid,
+          tags,
           createdAt: serverTimestamp()
         });
         toast.success("Bookmark added");
@@ -135,6 +156,18 @@ const HomePage = () => {
     [user]
   );
 
+  const handleBookmarkVisited = useCallback(async (id: string) => {
+    if (!user) return;
+
+    try {
+      await updateDoc(doc(db, "bookmarks", id), {
+        lastVisitedAt: serverTimestamp()
+      });
+    } catch {
+      // Ignore tracking errors silently
+    }
+  }, [user]);
+
   if (loading || (!user && typeof window !== "undefined")) {
     return (
       <div className="flex w-full items-center justify-center">
@@ -169,6 +202,7 @@ const HomePage = () => {
         bookmarks={bookmarks}
         loading={bookmarksLoading}
         onDeleteBookmark={handleDeleteBookmark}
+        onBookmarkClick={handleBookmarkVisited}
       />
     </div>
   );

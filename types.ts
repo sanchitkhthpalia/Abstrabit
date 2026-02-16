@@ -5,6 +5,8 @@ export interface Bookmark {
   title: string;
   url: string;
   userId: string;
+  tags: string[];
   createdAt: Timestamp | null;
+  lastVisitedAt: Timestamp | null;
 }
 

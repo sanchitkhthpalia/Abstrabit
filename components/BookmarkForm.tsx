@@ -4,12 +4,17 @@ import { FormEvent, useState } from "react";
 import toast from "react-hot-toast";
 
 interface BookmarkFormProps {
-  onAddBookmark: (title: string, url: string) => Promise<void> | void;
+  onAddBookmark: (payload: {
+    title: string;
+    url: string;
+    tags: string[];
+  }) => Promise<void> | void;
 }
 
 export const BookmarkForm = ({ onAddBookmark }: BookmarkFormProps) => {
   const [title, setTitle] = useState<string>("");
   const [url, setUrl] = useState<string>("");
+  const [tagsInput, setTagsInput] = useState<string>("");
   const [submitting, setSubmitting] = useState<boolean>(false);
 
   const normalizeUrl = (value: string): string => {
@@ -48,11 +53,21 @@ export const BookmarkForm = ({ onAddBookmark }: BookmarkFormProps) => {
       return;
     }
 
+    const tags = tagsInput
+      .split(",")
+      .map(tag => tag.trim())
+      .filter(tag => tag.length > 0);
+
     try {
       setSubmitting(true);
-      await onAddBookmark(trimmedTitle, normalizedUrl);
+      await onAddBookmark({
+        title: trimmedTitle,
+        url: normalizedUrl,
+        tags
+      });
       setTitle("");
       setUrl("");
+      setTagsInput("");
     } finally {
       setSubmitting(false);
     }
@@ -107,6 +122,26 @@ export const BookmarkForm = ({ onAddBookmark }: BookmarkFormProps) => {
             value={url}
             onChange={e => setUrl(e.target.value)}
           />
+        </div>
+
+        <div className="space-y-1.5">
+          <label
+            htmlFor="bookmark-tags"
+            className="text-xs font-medium text-slate-300"
+          >
+            Tags
+          </label>
+          <input
+            id="bookmark-tags"
+            className="input"
+            placeholder="tech, ai, react"
+            value={tagsInput}
+            onChange={e => setTagsInput(e.target.value)}
+          />
+          <p className="text-[10px] text-slate-500">
+            Separate tags with commas. Example: <span>work</span>,{" "}
+            <span>frontend</span>, <span>reading-list</span>
+          </p>
         </div>
       </div>
 
