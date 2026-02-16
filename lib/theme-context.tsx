@@ -48,8 +48,11 @@ export const ThemeProvider = ({ children }: ThemeProviderProps) => {
     if (typeof document === "undefined") return;
 
     const root = document.documentElement;
-    root.classList.remove("light", "dark");
-    root.classList.add(theme);
+    if (theme === "dark") {
+      root.classList.add("dark");
+    } else {
+      root.classList.remove("dark");
+    }
 
     window.localStorage.setItem(THEME_STORAGE_KEY, theme);
   }, [theme]);
