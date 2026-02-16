@@ -108,13 +108,13 @@ export const BookmarkList = ({
         // eslint-disable-next-line react/no-array-index-key
         <li
           key={index}
-          className="group flex items-center justify-between gap-3 rounded-xl border border-slate-200/80 bg-white px-3 py-3 dark:border-slate-800/80 dark:bg-slate-900/80"
+          className="group flex items-center justify-between gap-3 rounded-xl border border-slate-800/80 bg-slate-900/80 px-3 py-3"
         >
           <div className="flex-1 animate-pulse space-y-2">
-            <div className="h-3 w-32 rounded-full bg-slate-200 dark:bg-slate-700/70" />
-            <div className="h-3 w-44 rounded-full bg-slate-100 dark:bg-slate-800/80" />
+            <div className="h-3 w-32 rounded-full bg-slate-700/70" />
+            <div className="h-3 w-44 rounded-full bg-slate-800/80" />
           </div>
-          <div className="h-8 w-8 animate-pulse rounded-full bg-slate-100 dark:bg-slate-800/80" />
+          <div className="h-8 w-8 animate-pulse rounded-full bg-slate-800/80" />
         </li>
       ))}
     </ul>
@@ -122,11 +122,11 @@ export const BookmarkList = ({
 
   const renderEmptyState = () => (
     <div className="flex items-center justify-center py-10">
-      <div className="w-full max-w-sm rounded-xl border border-dashed border-slate-300 bg-slate-50 px-6 py-8 text-center dark:border-slate-700 dark:bg-slate-900/60">
-        <h3 className="mb-1 text-sm font-semibold text-slate-900 dark:text-slate-100">
+      <div className="w-full max-w-sm rounded-xl border border-dashed border-slate-700 bg-slate-900/60 px-6 py-8 text-center">
+        <h3 className="mb-1 text-sm font-semibold text-slate-100">
           No bookmarks yet
         </h3>
-        <p className="text-xs text-slate-500 dark:text-slate-400">
+        <p className="text-xs text-slate-400">
           Add your first bookmark to get started 🚀
         </p>
       </div>
@@ -134,13 +134,13 @@ export const BookmarkList = ({
   );
 
   return (
-    <section className="card border-slate-200/80 p-4 sm:p-5 dark:border-slate-800/60">
+    <section className="card border-slate-800/60 p-4 sm:p-5">
       <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-100">
+          <h2 className="text-sm font-semibold text-slate-100">
             Your bookmarks
           </h2>
-          <p className="text-[11px] text-slate-500 dark:text-slate-400">
+          <p className="text-[11px] text-slate-400">
             Search, sort, and filter your saved links.
           </p>
         </div>
@@ -174,19 +174,19 @@ export const BookmarkList = ({
       </div>
 
       <div className="mb-3 flex flex-wrap items-center gap-2">
-        <span className="rounded-full bg-slate-100 px-2.5 py-0.5 text-[10px] font-medium text-slate-600 dark:bg-slate-800 dark:text-slate-300">
+        <span className="rounded-full bg-slate-800 px-2.5 py-0.5 text-[10px] font-medium text-slate-300">
           {bookmarks.length} saved
         </span>
 
         {activeTag && (
           <div className="flex items-center gap-2 text-[11px]">
-            <span className="rounded-full bg-blue-500/10 px-2 py-0.5 text-[11px] font-medium text-blue-600 dark:bg-blue-500/15 dark:text-blue-400">
+            <span className="rounded-full bg-blue-500/15 px-2 py-0.5 text-[11px] font-medium text-blue-400">
               Tag: {activeTag}
             </span>
             <button
               type="button"
               onClick={clearTagFilter}
-              className="text-[11px] text-slate-500 underline-offset-2 hover:text-slate-700 hover:underline dark:text-slate-400 dark:hover:text-slate-200"
+              className="text-[11px] text-slate-400 underline-offset-2 hover:text-slate-200 hover:underline"
             >
               Clear filter
             </button>
@@ -199,7 +199,7 @@ export const BookmarkList = ({
       ) : bookmarks.length === 0 ? (
         renderEmptyState()
       ) : noResultsWithSearch ? (
-        <div className="flex items-center justify-center py-8 text-xs text-slate-500 dark:text-slate-400">
+        <div className="flex items-center justify-center py-8 text-xs text-slate-400">
           No bookmarks match your search.
         </div>
       ) : (
@@ -207,7 +207,7 @@ export const BookmarkList = ({
           {visibleBookmarks.map(bookmark => (
             <li
               key={bookmark.id}
-              className="group flex items-center justify-between gap-3 rounded-xl border border-slate-200/80 bg-white px-3 py-3 transition-colors hover:border-slate-400 hover:bg-slate-50 dark:border-slate-800/80 dark:bg-slate-900/80 dark:hover:border-slate-600 dark:hover:bg-slate-900"
+              className="group flex items-center justify-between gap-3 rounded-xl border border-slate-800/80 bg-slate-900/80 px-3 py-3 transition-colors hover:border-slate-600 hover:bg-slate-900"
             >
               <div className="min-w-0 flex-1">
                 <a
@@ -215,11 +215,11 @@ export const BookmarkList = ({
                   target="_blank"
                   rel="noreferrer"
                   onClick={() => handleBookmarkClick(bookmark.id)}
-                  className="block truncate text-sm font-medium text-slate-900 transition-colors hover:text-blue-500 dark:text-slate-50 dark:hover:text-blue-400"
+                  className="block truncate text-sm font-medium text-slate-50 transition-colors hover:text-blue-400"
                 >
                   {bookmark.title}
                 </a>
-                <p className="mt-0.5 truncate text-xs text-slate-500 dark:text-slate-400">
+                <p className="mt-0.5 truncate text-xs text-slate-400">
                   {bookmark.url}
                 </p>
 
@@ -230,7 +230,7 @@ export const BookmarkList = ({
                         key={tag}
                         type="button"
                         onClick={() => handleTagClick(tag)}
-                        className="rounded-full border border-slate-200 bg-slate-50 px-2 py-0.5 text-[10px] text-slate-600 transition-colors hover:border-blue-400 hover:bg-blue-50 hover:text-blue-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:border-blue-500 dark:hover:bg-blue-500/10 dark:hover:text-blue-300"
+                        className="rounded-full border border-slate-700 bg-slate-800 px-2 py-0.5 text-[10px] text-slate-300 transition-colors hover:border-blue-500 hover:bg-blue-500/10 hover:text-blue-300"
                       >
                         {tag}
                       </button>
@@ -243,7 +243,7 @@ export const BookmarkList = ({
                 type="button"
                 onClick={() => handleDeleteClick(bookmark.id)}
                 disabled={deletingId === bookmark.id}
-                className="ml-1 inline-flex h-8 w-8 flex-none items-center justify-center rounded-full border border-transparent text-slate-400 transition-colors hover:border-red-500/60 hover:bg-red-50 hover:text-red-500 disabled:cursor-not-allowed disabled:opacity-60 dark:hover:bg-red-950/40 dark:hover:text-red-400"
+                className="ml-1 inline-flex h-8 w-8 flex-none items-center justify-center rounded-full border border-transparent text-slate-400 transition-colors hover:border-red-500/60 hover:bg-red-950/40 hover:text-red-400 disabled:cursor-not-allowed disabled:opacity-60"
                 aria-label="Delete bookmark"
               >
                 {deletingId === bookmark.id ? (
@@ -257,7 +257,7 @@ export const BookmarkList = ({
         </ul>
       )}
 
-      <p className="mt-4 text-[10px] text-slate-500 dark:text-slate-500">
+      <p className="mt-4 text-[10px] text-slate-500">
         Bookmarks are private to your Google account. Changes sync in real time
         across all open tabs.
       </p>

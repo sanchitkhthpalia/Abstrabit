@@ -6,17 +6,17 @@ export const Navbar = () => {
   const { user, signOutUser } = useAuth();
 
   return (
-    <header className="border-b border-slate-200/70 bg-slate-50/80 backdrop-blur-sm">
+    <header className="border-b border-slate-800 bg-slate-950/80 backdrop-blur-sm">
       <nav className="mx-auto flex h-16 max-w-5xl items-center justify-between px-4">
         <div className="flex items-center gap-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-blue-600/10 text-blue-600">
+          <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-primary/10 text-primary">
             <span className="text-xs font-semibold">SB</span>
           </div>
           <div className="flex flex-col leading-tight">
-            <span className="text-sm font-semibold text-slate-900">
+            <span className="text-sm font-semibold text-slate-100">
               Smart Bookmark
             </span>
-            <span className="text-xs text-slate-500">
+            <span className="text-xs text-slate-400">
               Minimal realtime bookmark manager
             </span>
           </div>
@@ -29,15 +29,15 @@ export const Navbar = () => {
                 <img
                   src={user.photoURL}
                   alt={user.displayName ?? "User avatar"}
-                  className="h-8 w-8 rounded-full border border-slate-300"
+                  className="h-8 w-8 rounded-full border border-slate-700"
                   referrerPolicy="no-referrer"
                 />
               )}
               <div className="hidden max-w-[140px] flex-col text-right text-xs sm:flex">
-                <span className="truncate font-medium text-slate-900">
+                <span className="truncate font-medium text-slate-100">
                   {user.displayName ?? "Google User"}
                 </span>
-                <span className="truncate text-slate-500">
+                <span className="truncate text-slate-400">
                   {user.email}
                 </span>
               </div>

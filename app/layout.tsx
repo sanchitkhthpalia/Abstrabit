@@ -15,7 +15,7 @@ interface RootLayoutProps {
 
 const RootLayout = ({ children }: RootLayoutProps) => {
   return (
-    <html lang="en" className="h-full">
+    <html lang="en" className="h-full dark">
       <body className="app-shell">
         <AuthProvider>
           <Navbar />
